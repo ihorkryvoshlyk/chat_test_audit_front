@@ -38,6 +38,7 @@
     "@typescript-eslint/no-shadow": "off",
     "func-names": "off",
     "no-plusplus": "off",
-    "no-shadow": "off"
+    "no-shadow": "off",
+    "no-underscore-dangle": "off"
   }
 }

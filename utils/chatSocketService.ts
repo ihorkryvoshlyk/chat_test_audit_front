@@ -1,7 +1,7 @@
 import io from "socket.io-client";
 import events from "events";
 
-class ChatSocketService {
+export class ChatSocketService {
   socket;
 
   eventEmitter = new events.EventEmitter();
@@ -20,29 +20,37 @@ class ChatSocketService {
   }
 
   getChatList(userId) {
-    this.socket.emit("chat-list", {
-      userId
-    });
-    this.socket.on("chat-list-response", (data) => {
-      this.eventEmitter.emit("chat-list-response", data);
-    });
+    if (this.socket) {
+      this.socket.emit("chat-list", {
+        userId
+      });
+      this.socket.on("chat-list-response", (data) => {
+        this.eventEmitter.emit("chat-list-response", data);
+      });
+    }
   }
 
   sendMessage(message) {
-    this.socket.emit("add-message", message);
+    if (this.socket) {
+      this.socket.emit("add-message", message);
+    }
   }
 
   receiveMessage() {
-    this.socket.on("add-message-response", (data) => {
-      this.eventEmitter.emit("add-message-response", data);
-    });
+    if (this.socket) {
+      this.socket.on("add-message-response", (data) => {
+        this.eventEmitter.emit("add-message-response", data);
+      });
+    }
   }
 
   logout(userId) {
-    this.socket.emit("logout", userId);
-    this.socket.on("logout-response", (data) => {
-      this.eventEmitter.emit("logout-response", data);
-    });
+    if (this.socket) {
+      this.socket.emit("logout", userId);
+      this.socket.on("logout-response", (data) => {
+        this.eventEmitter.emit("logout-response", data);
+      });
+    }
   }
 }
 

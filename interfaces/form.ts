@@ -1,9 +1,11 @@
 export interface LoginForm {
-  username: string;
+  email: string;
   password: string;
 }
 
 export interface SignupForm {
-  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
   password: string;
 }

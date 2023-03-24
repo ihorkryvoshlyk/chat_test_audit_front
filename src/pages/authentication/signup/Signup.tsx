@@ -1,15 +1,20 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Button, FormGroup, TextField } from "@mui/material";
+import { Grid, FormGroup, TextField } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
+import Button from "@component/Button";
 import chatHttpService from "@utils/chatHttpService";
 import { SignupForm } from "@interfaces/form";
 
 const SignpuFormSchema = yup.object().shape({
-  username: yup.string().required("This field must be required."),
+  firstName: yup.string().required("This field must be required."),
+  lastName: yup.string().required("This field must be required."),
+  email: yup
+    .string()
+    .required("This field must be required.")
+    .email("Invalid Email address"),
   password: yup.string().required("This field must be required.")
 });
 
@@ -19,18 +24,17 @@ const Signup = () => {
   const { control, handleSubmit } = useForm<SignupForm>({
     resolver,
     defaultValues: {
-      username: "",
+      firstName: "",
+      lastName: "",
+      email: "",
       password: ""
     }
   });
-
-  const navigate = useNavigate();
 
   const handleSignup = async (values) => {
     try {
       const response = await chatHttpService.register(values);
       chatHttpService.setLS("userid", response.data.userId);
-      navigate("/home");
     } catch (error) {
       alert("Unable to register, try after some time.");
     }
@@ -38,24 +42,61 @@ const Signup = () => {
 
   return (
     <form onSubmit={handleSubmit((data) => handleSignup(data))}>
-      <FormGroup>
-        <Controller
-          control={control}
-          name="username"
-          render={({ field }) => <TextField {...field} />}
-        />
-      </FormGroup>
-
-      <FormGroup>
-        <Controller
-          control={control}
-          name="password"
-          render={({ field }) => <TextField {...field} />}
-        />
-      </FormGroup>
-      <Button variant="contained" type="submit">
-        Signup
-      </Button>
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <FormGroup>
+            <Controller
+              control={control}
+              name="firstName"
+              render={({ field }) => (
+                <TextField placeholder="Input your first name." {...field} />
+              )}
+            />
+          </FormGroup>
+        </Grid>
+        <Grid item xs={12}>
+          <FormGroup>
+            <Controller
+              control={control}
+              name="lastName"
+              render={({ field }) => (
+                <TextField placeholder="Input your last name." {...field} />
+              )}
+            />
+          </FormGroup>
+        </Grid>
+        <Grid item xs={12}>
+          <FormGroup>
+            <Controller
+              control={control}
+              name="email"
+              render={({ field }) => (
+                <TextField placeholder="Input email address." {...field} />
+              )}
+            />
+          </FormGroup>
+        </Grid>
+        <Grid item xs={12}>
+          <FormGroup>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field }) => (
+                <TextField
+                  type="password"
+                  placeholder="Input password."
+                  {...field}
+                />
+              )}
+            />
+          </FormGroup>
+        </Grid>
+        <Grid item xs={12}>
+          <Button variant="contained" type="submit" gradient rounded fullWidth>
+            Signup
+          </Button>
+        </Grid>
+      </Grid>
     </form>
   );
 };

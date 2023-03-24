@@ -31,23 +31,18 @@ const setLS = (key, value) =>
   });
 
 const login = (userCredential) =>
-  axios.post("http://localhost:4000/login", userCredential);
-
-const checkUsernameAvailability = (username) =>
-  axios.post("http://localhost:4000/usernameAvailable", {
-    username
-  });
+  axios.post("/api/auth/signin", userCredential);
 
 const register = (userCredential) =>
-  axios.post("http://localhost:4000/register", userCredential);
+  axios.post("/api/auth/signup", userCredential);
 
 const userSessionCheck = (userId) =>
-  axios.post("http://localhost:4000/userSessionCheck", {
+  axios.post("/api/auth/userSessionCheck", {
     userId
   });
 
 const getMessages = (userId, toUserId) =>
-  axios.post("http://localhost:4000/getMessages", {
+  axios.post("/api/message/getMessages", {
     userId,
     toUserId
   });
@@ -57,7 +52,6 @@ export default {
   removeLS,
   setLS,
   login,
-  checkUsernameAvailability,
   register,
   userSessionCheck,
   getMessages
