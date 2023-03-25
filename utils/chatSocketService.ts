@@ -9,7 +9,7 @@ export class ChatSocketService {
   // Connecting to Socket Server
   establishSocketConnection(userId) {
     try {
-      this.socket = io(`http://localhost:4000`, {
+      this.socket = io('https://test-audit-back.onrender.com', {
         query: {
           userId // `userId=${userId}`
         }
