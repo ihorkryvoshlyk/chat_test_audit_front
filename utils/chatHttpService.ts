@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const endPoint = "https://1d4d-188-43-14-13.eu.ngrok.io";
+const endPoint = "https://da96-188-43-14-13.eu.ngrok.io";
 
 const getUserId = () =>
   new Promise((resolve, reject) => {
