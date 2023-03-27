@@ -1,5 +1,7 @@
 import axios from "axios";
 
+const endPoint = "https://test-audit-back.onrender.com";
+
 const getUserId = () =>
   new Promise((resolve, reject) => {
     try {
@@ -31,18 +33,18 @@ const setLS = (key, value) =>
   });
 
 const login = (userCredential) =>
-  axios.post("/api/auth/signin", userCredential);
+  axios.post(`${endPoint}/api/auth/signin`, userCredential);
 
 const register = (userCredential) =>
-  axios.post("/api/auth/signup", userCredential);
+  axios.post(`${endPoint}/api/auth/signup`, userCredential);
 
 const userSessionCheck = (userId) =>
-  axios.post("/api/auth/userSessionCheck", {
+  axios.post(`${endPoint}/api/auth/userSessionCheck`, {
     userId
   });
 
 const getMessages = (userId, toUserId) =>
-  axios.post("/api/message/getMessages", {
+  axios.post(`${endPoint}/api/message/getMessages`, {
     userId,
     toUserId
   });
