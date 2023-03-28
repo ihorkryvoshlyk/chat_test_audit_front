@@ -19,7 +19,7 @@ const chatSlice = createSlice({
   reducers: {
     setUsers(state, action: PayloadAction<any>) {
       if (!action.payload.error) {
-        let newUserList = state.users;
+        let newUserList: ChatUser[] = [];
         if (action.payload.singleUser) {
           if (state.users.length > 0) {
             newUserList = state.users.filter(
