@@ -1,7 +1,5 @@
 import axios from "axios";
 
-const endPoint = "https://da96-188-43-14-13.eu.ngrok.io";
-
 const getUserId = () =>
   new Promise((resolve, reject) => {
     try {
@@ -33,18 +31,18 @@ const setLS = (key, value) =>
   });
 
 const login = (userCredential) =>
-  axios.post(`${endPoint}/api/auth/signin`, userCredential);
+  axios.post(`/api/auth/signin`, userCredential);
 
 const register = (userCredential) =>
-  axios.post(`${endPoint}/api/auth/signup`, userCredential);
+  axios.post(`/api/auth/signup`, userCredential);
 
 const userSessionCheck = (userId) =>
-  axios.post(`${endPoint}/api/auth/userSessionCheck`, {
+  axios.post(`/api/auth/userSessionCheck`, {
     userId
   });
 
 const getMessages = (userId, toUserId) =>
-  axios.post(`${endPoint}/api/message/getMessages`, {
+  axios.post(`/api/message/getMessages`, {
     userId,
     toUserId
   });

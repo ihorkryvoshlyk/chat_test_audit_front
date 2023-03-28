@@ -30,6 +30,8 @@
     "react/no-unstable-nested-components": "off",
     "react/button-has-type": "off",
     "react/function-component-definition": "off",
+    "react/prefer-stateless-function": "off",
+    "react/state-in-constructor": "off",
     "jsx-a11y/anchor-is-valid": "off",
     "jsx-a11y/media-has-caption": "off",
     "typescript-eslint/no-explicit-any": "off",

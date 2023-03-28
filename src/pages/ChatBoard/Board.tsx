@@ -2,6 +2,7 @@ import React, { FC, useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { isEqual, format, getDate } from "date-fns";
+import { Socket } from "socket.io-client";
 
 import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
@@ -11,7 +12,6 @@ import IconButton from "@component/IconButton";
 import MessageBox from "@component/MessageBox";
 import Typography from "@component/Typography";
 import { ChatUser } from "@interfaces/entities";
-import { ChatSocketService } from "@utils/chatSocketService";
 import { getChatList } from "@redux/chat/selectors";
 import { setChats, addChat } from "@redux/chat";
 
@@ -19,12 +19,12 @@ import chatHttpService from "@utils/chatHttpService";
 
 export interface Props {
   userId?: string | null;
-  chatSocketService: ChatSocketService;
   selectedUser?: ChatUser;
+  socket?: Socket;
 }
 
 const Board: FC<Props> = (props) => {
-  const { userId, selectedUser, chatSocketService } = props;
+  const { userId, selectedUser, socket } = props;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [message, setMessage] = useState<string>("");
@@ -43,16 +43,18 @@ const Board: FC<Props> = (props) => {
   };
 
   const sendAndUpdateMessages = (message) => {
-    try {
-      chatSocketService.sendMessage(message);
-      dispatch(
-        addChat({
-          message
-        })
-      );
-      scrollMessageContainer();
-    } catch (error) {
-      alert(`Can't send your message`);
+    if (socket) {
+      try {
+        socket.emit("add-message", message);
+        dispatch(
+          addChat({
+            message
+          })
+        );
+        scrollMessageContainer();
+      } catch (error) {
+        alert(`Can't send your message`);
+      }
     }
   };
 
@@ -83,7 +85,6 @@ const Board: FC<Props> = (props) => {
           selectedUser._id
         );
 
-        console.log(response);
         dispatch(
           setChats({
             messages: response.data.messages
@@ -98,7 +99,7 @@ const Board: FC<Props> = (props) => {
   };
 
   const receiveSocketMessages = (socketResponse) => {
-    console.log(socketResponse);
+    console.log(socketResponse, selectedUser?._id);
     if (selectedUser !== null && selectedUser?._id === socketResponse.from) {
       dispatch(
         addChat({
@@ -110,12 +111,15 @@ const Board: FC<Props> = (props) => {
   };
 
   useEffect(() => {
-    chatSocketService.receiveMessage();
-    chatSocketService.eventEmitter.on(
-      "add-message-response",
-      receiveSocketMessages
-    );
-  }, []);
+    if (socket) {
+      socket.on("add-message-response", receiveSocketMessages);
+    }
+    return () => {
+      if (socket) {
+        socket.off("add-message-response", receiveSocketMessages);
+      }
+    };
+  }, [socket, selectedUser]);
 
   useEffect(() => {
     getMessages();
@@ -140,14 +144,10 @@ const Board: FC<Props> = (props) => {
       >
         <Grid container spacing={1}>
           {chatList?.map((chat) => {
-            let timestamp = format(
-              new Date(chat.createdAt),
-              "yyyy-MM-dd hh:mm"
-            );
-            if (
-              isEqual(getDate(new Date(chat.createdAt)), getDate(new Date()))
-            ) {
-              timestamp = `Today ${format(new Date(chat.createdAt), "hh:mm")}`;
+            const createdAt = chat.createdAt || Date.now();
+            let timestamp = format(new Date(createdAt), "yyyy-MM-dd hh:mm");
+            if (isEqual(getDate(new Date(createdAt)), getDate(new Date()))) {
+              timestamp = `Today ${format(new Date(createdAt), "hh:mm")}`;
             }
             return (
               <Grid item xs={12}>

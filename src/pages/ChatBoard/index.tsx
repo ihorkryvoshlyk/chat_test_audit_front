@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
+import { Socket } from "socket.io-client";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -8,8 +9,8 @@ import { makeStyles } from "@mui/styles";
 import { Theme } from "@mui/material";
 
 import Typography from "@component/Typography";
-import chatSocketService from "@utils/chatSocketService";
 import { ChatUser } from "@interfaces/entities";
+import initSocket from "@utils/initSocket";
 
 import Header from "./Header";
 import SideMenu from "./SideMenu";
@@ -49,6 +50,7 @@ const ChatBoard = () => {
   const classes = useStyles();
   const userId = localStorage.getItem("userid");
   const [selectedUser, setSelectedUser] = useState<ChatUser | undefined>();
+  const [socket, setSocket] = useState<Socket | undefined>(undefined);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -56,9 +58,9 @@ const ChatBoard = () => {
 
   useEffect(() => {
     if (userId) {
-      chatSocketService.establishSocketConnection(userId);
+      setSocket(initSocket(userId));
     }
-  }, []);
+  }, [userId]);
 
   if (!userId) {
     return <Navigate to="/auth" replace />;
@@ -89,8 +91,8 @@ const ChatBoard = () => {
           <Grid item lg={4} xs={12} className={classes.taskListWrapper}>
             <ChatList
               userId={userId}
-              chatSocketService={chatSocketService}
               onChangeSelectedUser={setSelectedUser}
+              socket={socket}
             />
           </Grid>
           <Grid item lg={6} xs={12} className={classes.chatBoardWrapper}>
@@ -98,7 +100,7 @@ const ChatBoard = () => {
               <Board
                 selectedUser={selectedUser}
                 userId={userId}
-                chatSocketService={chatSocketService}
+                socket={socket}
               />
             </Grid>
           </Grid>

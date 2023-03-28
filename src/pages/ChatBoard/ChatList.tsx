@@ -1,6 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import React, { FC, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { Socket } from "socket.io-client";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -13,7 +14,6 @@ import Typography from "@component/Typography";
 
 import { getUserList } from "@redux/chat/selectors";
 import { setUsers } from "@redux/chat";
-import { ChatSocketService } from "@utils/chatSocketService";
 import { ChatUser } from "@interfaces/entities";
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -35,28 +35,26 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 interface Props {
   userId?: string | null;
-  chatSocketService: ChatSocketService;
   onChangeSelectedUser?: (user?: ChatUser) => void;
+  socket?: Socket;
 }
 
 const ChatList: FC<Props> = (props) => {
-  const { userId, chatSocketService, onChangeSelectedUser } = props;
+  const { userId, onChangeSelectedUser, socket } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
   const userList = useSelector(getUserList);
   const [selectedUser, setSelectedUser] = useState<ChatUser | undefined>();
 
   useEffect(() => {
-    if (userId) {
-      chatSocketService.getChatList(userId);
-      chatSocketService.eventEmitter.on(
-        "chat-list-response",
-        (chatListResponse) => {
-          dispatch(setUsers(chatListResponse));
-        }
-      );
+    if (socket && userId) {
+      socket.emit("chat-list", { userId });
+      socket.on("chat-list-response", (data) => {
+        dispatch(setUsers(data));
+      });
     }
-  }, []);
+    if (false) dispatch(setUsers([]));
+  }, [socket]);
 
   useEffect(() => {
     if (onChangeSelectedUser) onChangeSelectedUser(selectedUser);
