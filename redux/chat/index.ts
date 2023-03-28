@@ -23,7 +23,7 @@ const chatSlice = createSlice({
         if (action.payload.singleUser) {
           if (state.users.length > 0) {
             newUserList = state.users.filter(
-              (obj) => obj._id !== action.payload.chatList[0]?._id
+              (obj) => obj._id !== action.payload.chatList[0]._id
             );
           } else {
             newUserList = [...state.users, ...action.payload.chatList];
@@ -46,7 +46,6 @@ const chatSlice = createSlice({
           users: newUserList
         };
       }
-      alert(`Unable to load Chat list, Redirecting to Login.`);
       return state;
     },
     setChats(state, action: PayloadAction<any>) {

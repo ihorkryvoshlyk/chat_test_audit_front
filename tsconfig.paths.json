@@ -5,7 +5,8 @@
       "@component/*": ["components/*"],
       "@utils/*": ["utils/*"],
       "@interfaces/*": ["interfaces/*"],
-      "@redux/*": ["redux/*"]
+      "@redux/*": ["redux/*"],
+      "@hooks/*": ["hooks/*"]
     }
   }
 }

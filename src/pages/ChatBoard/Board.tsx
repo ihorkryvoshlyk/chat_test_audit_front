@@ -14,6 +14,7 @@ import Typography from "@component/Typography";
 import { ChatUser } from "@interfaces/entities";
 import { getChatList } from "@redux/chat/selectors";
 import { setChats, addChat } from "@redux/chat";
+import useGlobalSnackbar from "@hooks/useGlobalSnackbar";
 
 import chatHttpService from "@utils/chatHttpService";
 
@@ -30,6 +31,8 @@ const Board: FC<Props> = (props) => {
   const [message, setMessage] = useState<string>("");
   const chatList = useSelector(getChatList);
   const messageContainer = useRef<HTMLDivElement>(null);
+
+  const { openSnackbar } = useGlobalSnackbar();
 
   const scrollMessageContainer = () => {
     if (messageContainer.current) {
@@ -60,13 +63,33 @@ const Board: FC<Props> = (props) => {
 
   const handleSendMessage = () => {
     if (message === "") {
-      alert(`Message can't be empty.`);
+      openSnackbar({
+        color: "error",
+        gradient: true,
+        rounded: true,
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "center"
+        },
+        message: "Message can't be empty",
+        autoHideDuration: 3000
+      });
     } else if (userId === "") {
       navigate("/", {
         replace: true
       });
     } else if (selectedUser === undefined) {
-      alert(`Select a user to chat.`);
+      openSnackbar({
+        color: "error",
+        gradient: true,
+        rounded: true,
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "center"
+        },
+        message: "Please select user you want to send message",
+        autoHideDuration: 3000
+      });
     } else {
       sendAndUpdateMessages({
         from: userId,
@@ -94,12 +117,21 @@ const Board: FC<Props> = (props) => {
       }
     } catch (error) {
       console.log(error);
-      alert("Unable to fetch messages");
+      openSnackbar({
+        color: "error",
+        gradient: true,
+        rounded: true,
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "center"
+        },
+        message: "Fetching message is failure. Please try again.",
+        autoHideDuration: 3000
+      });
     }
   };
 
   const receiveSocketMessages = (socketResponse) => {
-    console.log(socketResponse, selectedUser?._id);
     if (selectedUser !== null && selectedUser?._id === socketResponse.from) {
       dispatch(
         addChat({
@@ -142,7 +174,7 @@ const Board: FC<Props> = (props) => {
         maxHeight="calc(100vh - 220px)"
         overflow="auto"
       >
-        <Grid container spacing={1}>
+        <Grid container spacing={1} justifyContent="flex-end">
           {chatList?.map((chat) => {
             const createdAt = chat.createdAt || Date.now();
             let timestamp = format(new Date(createdAt), "yyyy-MM-dd hh:mm");

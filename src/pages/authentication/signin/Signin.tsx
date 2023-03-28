@@ -4,10 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { AxiosError } from "axios";
 
 import Button from "@component/Button";
 import { LoginForm } from "@interfaces/form";
 import chatHttpService from "@utils/chatHttpService";
+import useGlobalSnackbar from "@hooks/useGlobalSnackbar";
 
 const LoginFormSchema = yup.object().shape({
   email: yup
@@ -20,7 +22,11 @@ const LoginFormSchema = yup.object().shape({
 const resolver = yupResolver(LoginFormSchema);
 
 const Signin = () => {
-  const { control, handleSubmit } = useForm<LoginForm>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<LoginForm>({
     resolver,
     defaultValues: {
       email: "",
@@ -28,6 +34,7 @@ const Signin = () => {
     }
   });
   const navigate = useNavigate();
+  const { openSnackbar } = useGlobalSnackbar();
 
   const handleLogin = async (values) => {
     try {
@@ -35,7 +42,20 @@ const Signin = () => {
       chatHttpService.setLS("userid", resp.data.userId);
       navigate("/");
     } catch (error) {
-      alert("Invalid login details");
+      const { response } = error as AxiosError;
+      openSnackbar({
+        color: "error",
+        gradient: true,
+        rounded: true,
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "center"
+        },
+        message:
+          Object.values(response?.data || {})[0] ||
+          "Signin request is failre, Please try again later.",
+        autoHideDuration: 3000
+      });
     }
   };
 
@@ -48,7 +68,13 @@ const Signin = () => {
               control={control}
               name="email"
               render={({ field }) => (
-                <TextField type="text" placeholder="Input email" {...field} />
+                <TextField
+                  type="text"
+                  placeholder="Input email"
+                  error={!!errors.email}
+                  helperText={errors.email?.message}
+                  {...field}
+                />
               )}
             />
           </FormGroup>
@@ -62,6 +88,8 @@ const Signin = () => {
                 <TextField
                   type="password"
                   placeholder="Input password"
+                  error={!!errors.password}
+                  helperText={errors.password?.message}
                   {...field}
                 />
               )}
