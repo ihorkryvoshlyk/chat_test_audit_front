@@ -1,104 +1,140 @@
-/* eslint-disable no-underscore-dangle */
-import React, { FC, useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React, { FC, useRef, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { isEqual, format, getDate } from "date-fns";
 import { Socket } from "socket.io-client";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import Avatar from "@mui/material/Avatar";
-import { makeStyles } from "@mui/styles";
-import { Theme } from "@mui/material";
 
+import Grid from "@mui/material/Grid";
+
+import MessageBox from "@component/MessageItem";
 import Typography from "@component/Typography";
-
-import { getUserList } from "@redux/chat/selectors";
-import { setUsers } from "@redux/chat";
 import { ChatUser } from "@interfaces/entities";
+import { getChatList } from "@redux/chat/selectors";
+import { setChats, addChat } from "@redux/chat";
+import useGlobalSnackbar from "@hooks/useGlobalSnackbar";
 
-const useStyles = makeStyles((theme: Theme) => ({
-  taskListItem: {
-    borderRadius: "14px",
-    cursor: "pointer",
-    "&:hover": {
-      backgroundColor: theme.customPalette.grey[3]
-    }
-  },
-  taskTitle: {
-    fontFamily: "Poppins",
-    fontStyle: "normal",
-    fontWeight: 600,
-    fontSize: "20px",
-    lineHeight: "26px"
-  }
-}));
+import chatHttpService from "@utils/chatHttpService";
 
-interface Props {
+export interface Props {
   userId?: string | null;
-  onChangeSelectedUser?: (user?: ChatUser) => void;
+  selectedUser: ChatUser;
   socket?: Socket;
 }
 
 const ChatList: FC<Props> = (props) => {
-  const { userId, onChangeSelectedUser, socket } = props;
+  const { userId, selectedUser, socket } = props;
   const dispatch = useDispatch();
-  const classes = useStyles();
-  const userList = useSelector(getUserList);
-  const [selectedUser, setSelectedUser] = useState<ChatUser | undefined>();
+  const chatList = useSelector(getChatList);
+  const messageContainer = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (socket && userId) {
-      socket.emit("chat-list", { userId });
-      socket.on("chat-list-response", (data) => {
-        dispatch(setUsers(data));
-      });
+  const { openSnackbar } = useGlobalSnackbar();
+
+  const scrollMessageContainer = () => {
+    if (messageContainer.current) {
+      try {
+        messageContainer.current.scrollTop =
+          messageContainer.current.scrollHeight;
+      } catch (error) {
+        console.warn(error);
+      }
     }
-    if (false) dispatch(setUsers([]));
-  }, [socket]);
-
-  useEffect(() => {
-    if (onChangeSelectedUser) onChangeSelectedUser(selectedUser);
-  }, [selectedUser]);
-
-  const handleSelectUser = (user) => {
-    setSelectedUser(user);
   };
 
+  const getMessages = async () => {
+    try {
+      if (selectedUser) {
+        const response = await chatHttpService.getMessages(
+          userId,
+          selectedUser._id
+        );
+
+        dispatch(
+          setChats({
+            messages: response.data.messages
+          })
+        );
+        scrollMessageContainer();
+      }
+    } catch (error) {
+      openSnackbar({
+        color: "error",
+        gradient: true,
+        rounded: true,
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "center"
+        },
+        message: "Fetching message is failure. Please try again.",
+        autoHideDuration: 3000
+      });
+    }
+  };
+
+  const receiveSocketMessages = (socketResponse) => {
+    if (selectedUser !== null && selectedUser?._id === socketResponse.from) {
+      dispatch(
+        addChat({
+          message: socketResponse
+        })
+      );
+      scrollMessageContainer();
+    }
+  };
+
+  useEffect(() => {
+    scrollMessageContainer();
+  }, [chatList]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("add-message-response", receiveSocketMessages);
+    }
+    return () => {
+      if (socket) {
+        socket.off("add-message-response", receiveSocketMessages);
+      }
+    };
+  }, [socket, selectedUser]);
+
+  useEffect(() => {
+    getMessages();
+  }, [selectedUser]);
+
   return (
-    <List sx={{ width: "100%", bgcolor: "background.paper" }}>
-      {userList?.map((user) => (
-        <ListItem
-          alignItems="flex-start"
-          className={classes.taskListItem}
-          key={user._id}
-          onClick={() => {
-            handleSelectUser(user);
-          }}
-          selected={selectedUser?._id === user._id}
-        >
-          <ListItemAvatar>
-            <Avatar alt={user.firstName} src="/static/images/avatar/1.jpg" />
-          </ListItemAvatar>
-          <ListItemText
-            primary={
-              <Typography
+    <Grid
+      item
+      display="flex"
+      ref={messageContainer}
+      maxHeight="calc(100vh - 329px)"
+      overflow="auto"
+    >
+      <Grid container spacing={1} justifyContent="flex-end">
+        {chatList?.map((chat) => {
+          const createdAt = chat.createdAt || Date.now();
+          let timestamp = format(new Date(createdAt), "yyyy-MM-dd hh:mm");
+          if (isEqual(getDate(new Date(createdAt)), getDate(new Date()))) {
+            timestamp = `Today ${format(new Date(createdAt), "hh:mm")}`;
+          }
+          return (
+            <Grid item xs={12}>
+              <MessageBox
                 gradient
-                sx={{ display: "inline" }}
-                variant="h5"
-                className={classes.taskTitle}
+                type={chat.from === userId ? "sendbox" : "inbox"}
+                sx={{ maxWidth: "80%" }}
               >
-                {`${user.firstName} ${user.lastName}`}
+                <Typography variant="h5">{chat.message}</Typography>
+              </MessageBox>
+              <Typography
+                variant="body2"
+                textAlign={chat.from === userId ? "right" : "left"}
+                padding="20px"
+              >
+                {timestamp}
               </Typography>
-            }
-            secondary={
-              <Typography sx={{ display: "inline" }} variant="body1">
-                Lorem ipsum dolor sit amet adipis elit. At at massa varius amet
-              </Typography>
-            }
-          />
-        </ListItem>
-      ))}
-    </List>
+            </Grid>
+          );
+        })}
+      </Grid>
+    </Grid>
   );
 };
 

@@ -7,6 +7,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Avatar from "@mui/material/Avatar";
 import { makeStyles } from "@mui/styles";
 import { Theme } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 import Typography from "@component/Typography";
 import { ChatUser } from "@interfaces/entities";
@@ -14,7 +15,7 @@ import initSocket from "@utils/initSocket";
 
 import Header from "./Header";
 import SideMenu from "./SideMenu";
-import ChatList from "./ChatList";
+import UserList from "./UserList";
 import Board from "./Board";
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -51,6 +52,8 @@ const ChatBoard = () => {
   const userId = localStorage.getItem("userid");
   const [selectedUser, setSelectedUser] = useState<ChatUser | undefined>();
   const [socket, setSocket] = useState<Socket | undefined>(undefined);
+  const isUpLg = useMediaQuery("(min-width:1750px)");
+  // const isUpMd = useMediaQuery('(min-width:1200px)');
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -60,7 +63,21 @@ const ChatBoard = () => {
     if (userId) {
       setSocket(initSocket(userId));
     }
+    return () => {
+      setSocket(undefined);
+    };
   }, [userId]);
+
+  useEffect(() => {
+    if (socket) {
+      window.onbeforeunload = () =>
+        socket.emit("logout", {
+          userId
+        });
+    }
+  }, [socket]);
+
+  console.log(isUpLg);
 
   if (!userId) {
     return <Navigate to="/auth" replace />;
@@ -88,30 +105,32 @@ const ChatBoard = () => {
       >
         <Toolbar className={classes.toolBar} />
         <Grid container spacing={2} className={classes.mainPanel}>
-          <Grid item lg={4} xs={12} className={classes.taskListWrapper}>
-            <ChatList
+          <Box width="580px" className={classes.taskListWrapper}>
+            <UserList
               userId={userId}
               onChangeSelectedUser={setSelectedUser}
               socket={socket}
             />
-          </Grid>
-          <Grid item lg={6} xs={12} className={classes.chatBoardWrapper}>
-            <Grid item xs={12} height="100%">
-              <Board
-                selectedUser={selectedUser}
-                userId={userId}
-                socket={socket}
-              />
-            </Grid>
-          </Grid>
-          <Grid item lg={2} xs={12} justifyContent="center">
-            <Avatar
-              alt="Ralph Edwards"
-              src="images/avatars/Avatars.png"
-              sx={{ width: 130, height: 130, margin: "auto" }}
+          </Box>
+          <Box flexGrow={1} className={classes.chatBoardWrapper}>
+            <Board
+              selectedUser={selectedUser}
+              userId={userId}
+              socket={socket}
             />
-            <Typography className={classes.userName}>Ralph Edwards</Typography>
-          </Grid>
+          </Box>
+          {isUpLg && (
+            <Box width="350px" justifyContent="center">
+              <Avatar
+                alt="Ralph Edwards"
+                src="images/avatars/Avatars.png"
+                sx={{ width: 130, height: 130, margin: "auto" }}
+              />
+              <Typography className={classes.userName}>
+                Ralph Edwards
+              </Typography>
+            </Box>
+          )}
         </Grid>
       </Box>
     </Box>

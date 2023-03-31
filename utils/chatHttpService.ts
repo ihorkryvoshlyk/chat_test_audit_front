@@ -47,6 +47,8 @@ const getMessages = (userId, toUserId) =>
     toUserId
   });
 
+const getUserInfo = (userId) => axios.get(`/api/auth/user-info/${userId}`);
+
 export default {
   getUserId,
   removeLS,
@@ -54,5 +56,6 @@ export default {
   login,
   register,
   userSessionCheck,
-  getMessages
+  getMessages,
+  getUserInfo
 };

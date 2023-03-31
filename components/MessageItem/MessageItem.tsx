@@ -35,13 +35,13 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
-export interface MessageBoxProps extends BoxProps {
+export interface MessageItemProps extends BoxProps {
   type?: "inbox" | "sendbox";
   gradient?: boolean;
   className?: string;
 }
 
-const MessageBox: FC<MessageBoxProps> = (props) => {
+const MessageItem: FC<MessageItemProps> = (props) => {
   const { type = "inbox", gradient = false, className, ...others } = props;
   const classes = useStyles();
 
@@ -65,4 +65,4 @@ const MessageBox: FC<MessageBoxProps> = (props) => {
   );
 };
 
-export default MessageBox;
+export default MessageItem;

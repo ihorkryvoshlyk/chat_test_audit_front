@@ -9,6 +9,7 @@ export interface ChatUser {
   email: string;
   isOnline: IsOnlineValue;
   _id: string;
+  isTyping?: boolean;
 }
 
 export interface Chat {

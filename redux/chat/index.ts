@@ -18,6 +18,7 @@ const chatSlice = createSlice({
   initialState,
   reducers: {
     setUsers(state, action: PayloadAction<any>) {
+      const userId = localStorage.getItem("userid");
       if (!action.payload.error) {
         let newUserList: ChatUser[] = [];
         if (action.payload.singleUser && action.payload.chatList[0]) {
@@ -26,9 +27,17 @@ const chatSlice = createSlice({
               (user) => user._id === action.payload.chatList[0]?._id
             );
             if (idx !== -1) {
-              newUserList = [...state.users];
+              newUserList = state.users.map((user, index) => {
+                if (index === idx) {
+                  return action.payload.chatList[0];
+                }
+                return user;
+              });
             } else {
-              newUserList = [...state.users, action.payload.chatList[0]];
+              newUserList = [
+                ...state.users,
+                ...action.payload.chatList.filter((li) => li._id !== userId)
+              ];
             }
           } else {
             newUserList = [...state.users, ...(action.payload.chatList || [])];
@@ -46,7 +55,6 @@ const chatSlice = createSlice({
         } else {
           newUserList = action.payload.chatList;
         }
-        console.log("before return", newUserList);
         return {
           ...state,
           users: newUserList
@@ -65,9 +73,28 @@ const chatSlice = createSlice({
         ...state,
         chats: [...state.chats, action.payload.message]
       };
+    },
+    setTypingUser(state, action: PayloadAction<any>) {
+      if (!action.payload.error) {
+        const newUsers = state.users.map((user) => {
+          if (user._id === action.payload.from) {
+            return {
+              ...user,
+              isTyping: action.payload.isTyping
+            };
+          }
+          return user;
+        });
+        console.log(newUsers);
+        return {
+          ...state,
+          users: newUsers
+        };
+      }
+      return state;
     }
   }
 });
 
-export const { setUsers, setChats, addChat } = chatSlice.actions;
+export const { setUsers, setChats, addChat, setTypingUser } = chatSlice.actions;
 export default chatSlice.reducer;
