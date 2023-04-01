@@ -42,7 +42,13 @@ export interface MessageItemProps extends BoxProps {
 }
 
 const MessageItem: FC<MessageItemProps> = (props) => {
-  const { type = "inbox", gradient = false, className, ...others } = props;
+  const {
+    type = "inbox",
+    gradient = false,
+    className,
+    children,
+    ...others
+  } = props;
   const classes = useStyles();
 
   return (
@@ -50,6 +56,7 @@ const MessageItem: FC<MessageItemProps> = (props) => {
       className={clsx(classes.wrapper, {
         [classes.sendboxWrapper]: type === "sendbox"
       })}
+      {...others}
     >
       <Box
         className={clsx(className, {
@@ -59,8 +66,9 @@ const MessageItem: FC<MessageItemProps> = (props) => {
           [classes.sendbox]: type === "sendbox",
           [classes.gradientSendbox]: type === "sendbox" && gradient
         })}
-        {...others}
-      />
+      >
+        {children}
+      </Box>
     </Box>
   );
 };

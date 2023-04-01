@@ -47,7 +47,7 @@ const Header: FC<Props> = (props) => {
     >
       <Toolbar>
         <IconButton
-          color="inherit"
+          color="primary"
           aria-label="open drawer"
           edge="start"
           onClick={handleDrawerToggle}

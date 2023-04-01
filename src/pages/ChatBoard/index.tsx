@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { Socket } from "socket.io-client";
+import { useBeforeunload } from "react-beforeunload";
+
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
-import Avatar from "@mui/material/Avatar";
 import { makeStyles } from "@mui/styles";
 import { Theme } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
-import Typography from "@component/Typography";
-import { ChatUser } from "@interfaces/entities";
 import initSocket from "@utils/initSocket";
+import { getSelectedUser } from "@redux/chat/selectors";
 
 import Header from "./Header";
 import SideMenu from "./SideMenu";
 import UserList from "./UserList";
 import Board from "./Board";
+import Profile from "./Profile";
 
 const useStyles = makeStyles((theme: Theme) => ({
   toolBar: {
@@ -29,7 +31,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     borderRight: `2px solid ${theme.customPalette.grey[2]}`
   },
   chatBoardWrapper: {
-    borderRight: `2px solid ${theme.customPalette.grey[2]}`
+    borderRight: `2px solid ${theme.customPalette.grey[2]}`,
+    flexGrow: 1,
+    flexBasis: 0
   },
   mainPanel: {
     height: "calc(100% - 68px)"
@@ -50,10 +54,11 @@ const ChatBoard = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const classes = useStyles();
   const userId = localStorage.getItem("userid");
-  const [selectedUser, setSelectedUser] = useState<ChatUser | undefined>();
   const [socket, setSocket] = useState<Socket | undefined>(undefined);
+  const [showUserList, setShowUserList] = useState<boolean>(false);
+  const selectedUser = useSelector(getSelectedUser);
   const isUpLg = useMediaQuery("(min-width:1750px)");
-  // const isUpMd = useMediaQuery('(min-width:1200px)');
+  const isUpMd = useMediaQuery("(min-width:1200px)");
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -68,16 +73,19 @@ const ChatBoard = () => {
     };
   }, [userId]);
 
-  useEffect(() => {
-    if (socket) {
-      window.onbeforeunload = () =>
-        socket.emit("logout", {
-          userId
-        });
-    }
-  }, [socket]);
+  useBeforeunload(() => {
+    socket.emit("logout", {
+      userId
+    });
+  });
 
-  console.log(isUpLg);
+  const handleShowUserList = () => {
+    setShowUserList(true);
+  };
+
+  const handleHideUserList = () => {
+    setShowUserList(false);
+  };
 
   if (!userId) {
     return <Navigate to="/auth" replace />;
@@ -105,32 +113,40 @@ const ChatBoard = () => {
       >
         <Toolbar className={classes.toolBar} />
         <Grid container spacing={2} className={classes.mainPanel}>
-          <Box width="580px" className={classes.taskListWrapper}>
+          <Grid
+            item
+            className={classes.taskListWrapper}
+            sx={{
+              width: isUpMd ? "580px" : undefined,
+              flexGrow: !isUpMd ? 1 : undefined,
+              display:
+                isUpMd || showUserList || !selectedUser ? "block" : "none"
+            }}
+          >
             <UserList
               userId={userId}
-              onChangeSelectedUser={setSelectedUser}
               socket={socket}
+              onClickUser={handleHideUserList}
             />
-          </Box>
-          <Box flexGrow={1} className={classes.chatBoardWrapper}>
-            <Board
-              selectedUser={selectedUser}
-              userId={userId}
-              socket={socket}
-            />
-          </Box>
-          {isUpLg && (
-            <Box width="350px" justifyContent="center">
-              <Avatar
-                alt="Ralph Edwards"
-                src="images/avatars/Avatars.png"
-                sx={{ width: 130, height: 130, margin: "auto" }}
-              />
-              <Typography className={classes.userName}>
-                Ralph Edwards
-              </Typography>
-            </Box>
-          )}
+          </Grid>
+          <Grid
+            item
+            className={classes.chatBoardWrapper}
+            sx={{
+              display: !isUpMd && !selectedUser ? "none" : "block"
+            }}
+          >
+            <Grid container>
+              <Grid item xs={12} height="100%">
+                <Board
+                  userId={userId}
+                  socket={socket}
+                  onShowUserList={handleShowUserList}
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+          {isUpLg && <Profile />}
         </Grid>
       </Box>
     </Box>

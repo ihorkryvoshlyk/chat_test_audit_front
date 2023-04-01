@@ -5,12 +5,15 @@ import { ChatUser, IsOnlineValue, Chat } from "@interfaces/entities";
 
 export type ChatState = {
   users: ChatUser[];
-  chats: Chat[];
+  chats: {
+    [key: string]: Chat[];
+  };
+  selectedUser?: ChatUser;
 };
 
 const initialState: ChatState = {
   users: [],
-  chats: []
+  chats: {}
 };
 
 const chatSlice = createSlice({
@@ -29,7 +32,10 @@ const chatSlice = createSlice({
             if (idx !== -1) {
               newUserList = state.users.map((user, index) => {
                 if (index === idx) {
-                  return action.payload.chatList[0];
+                  return {
+                    ...action.payload.chatList[0],
+                    lastMessage: user.lastMessage
+                  };
                 }
                 return user;
               });
@@ -63,15 +69,48 @@ const chatSlice = createSlice({
       return state;
     },
     setChats(state, action: PayloadAction<any>) {
-      return {
-        ...state,
-        chats: action.payload.messages
-      };
+      if (state.selectedUser) {
+        return {
+          ...state,
+          chats: {
+            ...state.chats,
+            [state.selectedUser?._id]: action.payload.messages
+          }
+        };
+      }
+      return state;
     },
     addChat(state, action: PayloadAction<any>) {
+      const { from, to } = action.payload.message;
+      const myId = localStorage.getItem("userid");
+      if (from === myId) {
+        return {
+          ...state,
+          chats: {
+            ...state.chats,
+            [to]: [...(state.chats[to] || []), action.payload.message]
+          }
+        };
+      }
+      if (from === state.selectedUser?._id) {
+        return {
+          ...state,
+          chats: {
+            ...state.chats,
+            [from]: [...(state.chats[from] || []), action.payload.message]
+          }
+        };
+      }
+
       return {
         ...state,
-        chats: [...state.chats, action.payload.message]
+        chats: {
+          ...state.chats,
+          [from]: [
+            ...(state.chats[from] || []),
+            { ...action.payload.message, unread: true }
+          ]
+        }
       };
     },
     setTypingUser(state, action: PayloadAction<any>) {
@@ -85,16 +124,22 @@ const chatSlice = createSlice({
           }
           return user;
         });
-        console.log(newUsers);
         return {
           ...state,
           users: newUsers
         };
       }
       return state;
+    },
+    setSelectedUser(state, action: PayloadAction<any>) {
+      return {
+        ...state,
+        selectedUser: action.payload
+      };
     }
   }
 });
 
-export const { setUsers, setChats, addChat, setTypingUser } = chatSlice.actions;
+export const { setUsers, setChats, addChat, setTypingUser, setSelectedUser } =
+  chatSlice.actions;
 export default chatSlice.reducer;

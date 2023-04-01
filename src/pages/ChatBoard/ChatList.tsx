@@ -1,15 +1,16 @@
 import React, { FC, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { isEqual, format, getDate } from "date-fns";
-import { Socket } from "socket.io-client";
 
+import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
+import Avatar from "@mui/material/Avatar";
 
 import MessageBox from "@component/MessageItem";
 import Typography from "@component/Typography";
 import { ChatUser } from "@interfaces/entities";
-import { getChatList } from "@redux/chat/selectors";
-import { setChats, addChat } from "@redux/chat";
+import { getChatList, getUserList } from "@redux/chat/selectors";
+import { setChats } from "@redux/chat";
 import useGlobalSnackbar from "@hooks/useGlobalSnackbar";
 
 import chatHttpService from "@utils/chatHttpService";
@@ -17,13 +18,13 @@ import chatHttpService from "@utils/chatHttpService";
 export interface Props {
   userId?: string | null;
   selectedUser: ChatUser;
-  socket?: Socket;
 }
 
 const ChatList: FC<Props> = (props) => {
-  const { userId, selectedUser, socket } = props;
+  const { userId, selectedUser } = props;
   const dispatch = useDispatch();
   const chatList = useSelector(getChatList);
+  const userList = useSelector(getUserList);
   const messageContainer = useRef<HTMLDivElement>(null);
 
   const { openSnackbar } = useGlobalSnackbar();
@@ -69,31 +70,9 @@ const ChatList: FC<Props> = (props) => {
     }
   };
 
-  const receiveSocketMessages = (socketResponse) => {
-    if (selectedUser !== null && selectedUser?._id === socketResponse.from) {
-      dispatch(
-        addChat({
-          message: socketResponse
-        })
-      );
-      scrollMessageContainer();
-    }
-  };
-
   useEffect(() => {
     scrollMessageContainer();
   }, [chatList]);
-
-  useEffect(() => {
-    if (socket) {
-      socket.on("add-message-response", receiveSocketMessages);
-    }
-    return () => {
-      if (socket) {
-        socket.off("add-message-response", receiveSocketMessages);
-      }
-    };
-  }, [socket, selectedUser]);
 
   useEffect(() => {
     getMessages();
@@ -108,21 +87,38 @@ const ChatList: FC<Props> = (props) => {
       overflow="auto"
     >
       <Grid container spacing={1} justifyContent="flex-end">
-        {chatList?.map((chat) => {
+        {chatList[selectedUser._id]?.map((chat) => {
           const createdAt = chat.createdAt || Date.now();
           let timestamp = format(new Date(createdAt), "yyyy-MM-dd hh:mm");
           if (isEqual(getDate(new Date(createdAt)), getDate(new Date()))) {
             timestamp = `Today ${format(new Date(createdAt), "hh:mm")}`;
           }
+          const sender = userList.find((user) => user._id === chat.from);
           return (
             <Grid item xs={12}>
-              <MessageBox
-                gradient
-                type={chat.from === userId ? "sendbox" : "inbox"}
-                sx={{ maxWidth: "80%" }}
+              <Box
+                display="flex"
+                flexGrow={1}
+                justifyContent={
+                  chat.from === userId ? "flex-end" : "flex-start"
+                }
               >
-                <Typography variant="h5">{chat.message}</Typography>
-              </MessageBox>
+                {chat.from !== userId && (
+                  <Avatar
+                    alt={sender?.firstName.toUpperCase()}
+                    src="/static/images/avatar/1.jpg"
+                    sx={{ width: 43, height: 43, marginRight: "15px" }}
+                  />
+                )}
+                <MessageBox
+                  gradient
+                  type={chat.from === userId ? "sendbox" : "inbox"}
+                  sx={{ maxWidth: "80%" }}
+                >
+                  <Typography variant="h5">{chat.message}</Typography>
+                </MessageBox>
+              </Box>
+
               <Typography
                 variant="body2"
                 textAlign={chat.from === userId ? "right" : "left"}

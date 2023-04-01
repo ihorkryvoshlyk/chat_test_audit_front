@@ -11,63 +11,63 @@ export interface BadgeProps extends Omit<MuiBadgeProps, "color"> {
 
 const useStyles = makeStyles((theme: Theme) => ({
   badge: {
-    "& .MuiBadge-badge": {
+    "& > .MuiBadge-badge": {
       border: "solid white",
       borderRadius: "50%"
     }
   },
   backgroundPrimary: {
-    "& .MuiBadge-badge": {
+    "& > .MuiBadge-badge": {
       backgroundColor: theme.palette.primary.main,
       color: theme.palette.primary.main
     }
   },
   backgroundSecondary: {
-    "& .MuiBadge-badge": {
+    "& > .MuiBadge-badge": {
       backgroundColor: theme.palette.secondary.main,
       color: theme.palette.secondary.main
     }
   },
   backgroundSuccess: {
-    "& .MuiBadge-badge": {
+    "& > .MuiBadge-badge": {
       backgroundColor: theme.palette.success.main,
       color: theme.palette.success.main
     }
   },
   backgroundError: {
-    "& .MuiBadge-badge": {
+    "& > .MuiBadge-badge": {
       backgroundColor: theme.palette.error.main,
       color: theme.palette.error.main
     }
   },
   backgroundWarning: {
-    "& .MuiBadge-badge": {
+    "& > .MuiBadge-badge": {
       backgroundColor: theme.palette.warning.main,
       color: theme.palette.warning.main
     }
   },
   backgroundInfo: {
-    "& .MuiBadge-badge": {
+    "& > .MuiBadge-badge": {
       backgroundColor: theme.palette.info.main,
       color: theme.palette.info.main
     }
   },
   small: {
-    "& .MuiBadge-badge": {
+    "& > .MuiBadge-badge": {
       width: "18px",
       height: "18px",
       borderWidth: "3px"
     }
   },
   medium: {
-    "& .MuiBadge-badge": {
+    "& > .MuiBadge-badge": {
       width: "23px",
       height: "23px",
       borderWidth: "4px"
     }
   },
   large: {
-    "& .MuiBadge-badge": {
+    "& > .MuiBadge-badge": {
       width: "27px",
       height: "27px",
       borderWidth: "6px"

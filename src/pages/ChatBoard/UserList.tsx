@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Socket } from "socket.io-client";
 import List from "@mui/material/List";
@@ -7,15 +7,18 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
+import { Badge as MuiBadge, Theme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { Theme } from "@mui/material";
 
 import Typography from "@component/Typography";
 import Badge from "@component/Badge";
 
-import { getUserList } from "@redux/chat/selectors";
-import { setUsers } from "@redux/chat";
-import { ChatUser } from "@interfaces/entities";
+import {
+  getUserList,
+  getChatList,
+  getSelectedUser
+} from "@redux/chat/selectors";
+import { setSelectedUser, setUsers, addChat } from "@redux/chat";
 
 const useStyles = makeStyles((theme: Theme) => ({
   taskListItem: {
@@ -36,16 +39,18 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 interface Props {
   userId?: string | null;
-  onChangeSelectedUser?: (user?: ChatUser) => void;
   socket?: Socket;
+  onClickUser?: () => void;
 }
 
 const UserList: FC<Props> = (props) => {
-  const { userId, onChangeSelectedUser, socket } = props;
+  const { userId, socket, onClickUser } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
   const userList = useSelector(getUserList);
-  const [selectedUser, setSelectedUser] = useState<ChatUser | undefined>();
+  const chatList = useSelector(getChatList);
+  const selectedUser = useSelector(getSelectedUser);
+  const ringRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     if (socket && userId) {
@@ -56,60 +61,100 @@ const UserList: FC<Props> = (props) => {
     }
   }, [socket]);
 
+  const receiveSocketMessages = (socketResponse) => {
+    ringRef.current?.play();
+    dispatch(
+      addChat({
+        message: socketResponse
+      })
+    );
+  };
+
   useEffect(() => {
-    if (onChangeSelectedUser) onChangeSelectedUser(selectedUser);
-  }, [selectedUser]);
+    if (socket) {
+      socket.on("add-message-response", receiveSocketMessages);
+    }
+    return () => {
+      if (socket) {
+        socket.off("add-message-response", receiveSocketMessages);
+      }
+    };
+  }, [socket, selectedUser]);
 
   const handleSelectUser = (user) => {
-    setSelectedUser(user);
+    dispatch(setSelectedUser(user));
   };
 
   return (
-    <List sx={{ width: "100%", bgcolor: "background.paper" }}>
-      {userList?.map((user) => (
-        <ListItem
-          alignItems="flex-start"
-          className={classes.taskListItem}
-          key={user._id}
-          onClick={() => {
-            handleSelectUser(user);
-          }}
-          selected={selectedUser?._id === user._id}
-        >
-          <ListItemAvatar>
-            <Badge
-              color={user.isOnline === "Y" ? "success" : "error"}
-              size="small"
+    <>
+      <List sx={{ width: "100%", bgcolor: "background.paper" }}>
+        {userList?.map((user) => {
+          const unreadMessages = chatList[user._id]?.filter(
+            (el) => el.unread
+          ).length;
+          return (
+            <MuiBadge
               overlap="circular"
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              variant="dot"
+              color="error"
+              badgeContent={unreadMessages}
+              sx={{
+                width: "100%",
+                "& .MuiBadge-anchorOriginTopRight": {
+                  right: "20px",
+                  top: "15px"
+                }
+              }}
             >
-              <Avatar
-                alt={user.firstName.toUpperCase()}
-                src="/static/images/avatar/1.jpg"
-              />
-            </Badge>
-          </ListItemAvatar>
-          <ListItemText
-            primary={
-              <Typography
-                gradient
-                sx={{ display: "inline" }}
-                variant="h5"
-                className={classes.taskTitle}
+              <ListItem
+                alignItems="flex-start"
+                className={classes.taskListItem}
+                key={user._id}
+                onClick={() => {
+                  handleSelectUser(user);
+                  if (onClickUser) onClickUser();
+                }}
+                selected={selectedUser?._id === user._id}
               >
-                {`${user.firstName} ${user.lastName}`}
-              </Typography>
-            }
-            secondary={
-              <Typography sx={{ display: "inline" }} variant="body1">
-                Lorem ipsum dolor sit amet adipis elit. At at massa varius amet
-              </Typography>
-            }
-          />
-        </ListItem>
-      ))}
-    </List>
+                <ListItemAvatar>
+                  <Badge
+                    color={user.isOnline === "Y" ? "success" : "error"}
+                    size="small"
+                    overlap="circular"
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    variant="dot"
+                  >
+                    <Avatar
+                      alt={user.firstName.toUpperCase()}
+                      src="/static/images/avatar/1.jpg"
+                    />
+                  </Badge>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={
+                    <Typography
+                      gradient
+                      sx={{ display: "inline" }}
+                      variant="h5"
+                      className={classes.taskTitle}
+                    >
+                      {`${user.firstName} ${user.lastName}`}
+                    </Typography>
+                  }
+                  secondary={
+                    user.lastMessage && (
+                      <Typography sx={{ display: "inline" }} variant="body1">
+                        {user.lastMessage.message}
+                      </Typography>
+                    )
+                  }
+                />
+              </ListItem>
+            </MuiBadge>
+          );
+        })}
+      </List>
+      <audio ref={ringRef} src="/sounds/new_message.mp3" />
+    </>
   );
 };
 
