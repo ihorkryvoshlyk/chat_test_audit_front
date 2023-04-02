@@ -5,8 +5,10 @@ import { Socket } from "socket.io-client";
 import { EmojiClickData } from "emoji-picker-react";
 import { useDebounce, useInterval } from "usehooks-ts";
 
+import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 import MessageInput from "@component/MessageInput";
 import IconButton from "@component/IconButton";
@@ -28,6 +30,7 @@ const MessageBox: FC<Props> = (props) => {
   const [message, setMessage] = useState<string>("");
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const messageContainer = useRef<HTMLDivElement>(null);
+  const isUpSmall = useMediaQuery("(min-width:420px)");
 
   const debouncedMessage = useDebounce(message, 500);
 
@@ -114,6 +117,11 @@ const MessageBox: FC<Props> = (props) => {
   useInterval(
     () => {
       if (socket && selectedUser && self) {
+        console.log({
+          from: self._id,
+          to: selectedUser._id,
+          isTyping
+        });
         socket.emit("typing-message", {
           from: self._id,
           to: selectedUser._id,
@@ -143,9 +151,9 @@ const MessageBox: FC<Props> = (props) => {
     console.log("attach");
   };
   return (
-    <Grid item display="flex" padding="20px">
+    <Grid item display="flex" padding={`${isUpSmall ? "20px" : "10px 0px"}`}>
       <Grid container>
-        <Grid item flexGrow={1} display="flex">
+        <Box flexGrow={1} display="flex">
           <MessageInput
             value={message}
             onChange={(value) => {
@@ -157,19 +165,23 @@ const MessageBox: FC<Props> = (props) => {
             onChangeEmoji={handleChangeEmoji}
             onClickAttach={handleAttachFile}
           />
-        </Grid>
+        </Box>
 
-        <Grid
-          item
+        <Box
           display="flex"
           flexDirection="column"
           justifyContent="end"
           paddingY="4px"
+          width={isUpSmall ? "auto" : "100%"}
         >
-          <IconButton backgroundGradient onClick={handleSendMessage}>
-            <SendRoundedIcon />
+          <IconButton
+            backgroundGradient
+            onClick={handleSendMessage}
+            size={`${isUpSmall ? "medium" : "small"}`}
+          >
+            <SendRoundedIcon fontSize={`${isUpSmall ? "medium" : "small"}`} />
           </IconButton>
-        </Grid>
+        </Box>
       </Grid>
     </Grid>
   );

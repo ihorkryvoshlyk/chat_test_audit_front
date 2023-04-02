@@ -35,7 +35,7 @@ const Profile = () => {
         sx={{ width: 130, height: 130, margin: "auto" }}
       />
       <Typography className={classes.userName}>
-        {`${selectedUser?.firstName} ${selectedUser?.lastName}`}
+        {`${selectedUser?.firstName || ""} ${selectedUser?.lastName || ""}`}
       </Typography>
       <Box textAlign="center">
         <IconButton>

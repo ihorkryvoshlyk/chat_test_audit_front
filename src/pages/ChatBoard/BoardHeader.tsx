@@ -36,8 +36,10 @@ const BoardHeader: FC<Props> = (props) => {
   const userList = useSelector(getUserList);
   const theme = useTheme();
   const isUpMd = useMediaQuery("(min-width:1200px)");
+  const isUpSm = useMediaQuery("(min-width:768px)");
 
   const handleTypingUser = (socketResponse) => {
+    console.log(socketResponse);
     dispatch(setTypingUser(socketResponse));
   };
 
@@ -119,45 +121,47 @@ const BoardHeader: FC<Props> = (props) => {
         />
       </ListItem>
       <Box flexGrow={1} />
-      <Box display="flex" alignItems="center">
-        <Typography
-          fontWeight={600}
-          fontSize={16}
-          sx={{ display: "inline", marginRight: "15px" }}
-          variant="h6"
-        >
-          Members
-        </Typography>
-        <Badge
-          color={selectedUser.isOnline === "Y" ? "success" : "error"}
-          size="small"
-          overlap="circular"
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          variant="dot"
-        >
-          <Avatar
-            alt={selectedUser.firstName.toUpperCase()}
-            src="/static/images/avatar/1.jpg"
-            sx={{ width: 48, height: 48 }}
-          />
-        </Badge>
-        <Badge
-          color={self?.isOnline === "Y" ? "success" : "error"}
-          size="small"
-          overlap="circular"
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          variant="dot"
-          sx={{
-            marginLeft: "-20px"
-          }}
-        >
-          <Avatar
-            alt={self?.firstName.toUpperCase()}
-            src="/static/images/avatar/1.jpg"
-            sx={{ width: 48, height: 48 }}
-          />
-        </Badge>
-      </Box>
+      {isUpSm && (
+        <Box display="flex" alignItems="center">
+          <Typography
+            fontWeight={600}
+            fontSize={16}
+            sx={{ display: "inline", marginRight: "15px" }}
+            variant="h6"
+          >
+            Members
+          </Typography>
+          <Badge
+            color={selectedUser.isOnline === "Y" ? "success" : "error"}
+            size="small"
+            overlap="circular"
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            variant="dot"
+          >
+            <Avatar
+              alt={selectedUser.firstName.toUpperCase()}
+              src="/static/images/avatar/1.jpg"
+              sx={{ width: 48, height: 48 }}
+            />
+          </Badge>
+          <Badge
+            color={self?.isOnline === "Y" ? "success" : "error"}
+            size="small"
+            overlap="circular"
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            variant="dot"
+            sx={{
+              marginLeft: "-20px"
+            }}
+          >
+            <Avatar
+              alt={self?.firstName.toUpperCase()}
+              src="/static/images/avatar/1.jpg"
+              sx={{ width: 48, height: 48 }}
+            />
+          </Badge>
+        </Box>
+      )}
     </Grid>
   );
 };

@@ -36,7 +36,7 @@ const Board: FC<Props> = (props) => {
           justifyContent="flex-end"
           height="100%"
         >
-          <Grid item xs={12}>
+          <Grid item xs={12} display="flex" flexDirection="column">
             <Grid
               container
               boxSizing="border-box"
@@ -50,6 +50,7 @@ const Board: FC<Props> = (props) => {
                 onShowUserList={onShowUserList}
               />
             </Grid>
+            <Box flexGrow="1" />
             <Grid
               container
               flexDirection="column"
@@ -57,7 +58,7 @@ const Board: FC<Props> = (props) => {
               flexShrink={1}
               alignItems="stretch"
               justifyContent="flex-end"
-              height="calc(100vh - 225px)"
+              height="calc(100vh - 239px)"
             >
               <ChatList selectedUser={selectedUser} userId={userId} />
               <Divider />

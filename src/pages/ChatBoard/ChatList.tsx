@@ -83,7 +83,7 @@ const ChatList: FC<Props> = (props) => {
       item
       display="flex"
       ref={messageContainer}
-      maxHeight="calc(100vh - 329px)"
+      maxHeight="calc(100vh - 361px)"
       overflow="auto"
     >
       <Grid container spacing={1} justifyContent="flex-end">

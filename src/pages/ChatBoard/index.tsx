@@ -27,11 +27,15 @@ const useStyles = makeStyles((theme: Theme) => ({
   mainContainer: {
     height: "100vh"
   },
-  taskListWrapper: {
-    borderRight: `2px solid ${theme.customPalette.grey[2]}`
+  userListWrapper: {
+    [theme.breakpoints.up("md")]: {
+      borderRight: `2px solid ${theme.customPalette.grey[2]}`
+    }
   },
   chatBoardWrapper: {
-    borderRight: `2px solid ${theme.customPalette.grey[2]}`,
+    [theme.breakpoints.up("md")]: {
+      borderRight: `2px solid ${theme.customPalette.grey[2]}`
+    },
     flexGrow: 1,
     flexBasis: 0
   },
@@ -115,7 +119,7 @@ const ChatBoard = () => {
         <Grid container spacing={2} className={classes.mainPanel}>
           <Grid
             item
-            className={classes.taskListWrapper}
+            className={classes.userListWrapper}
             sx={{
               width: isUpMd ? "580px" : undefined,
               flexGrow: !isUpMd ? 1 : undefined,
@@ -133,10 +137,13 @@ const ChatBoard = () => {
             item
             className={classes.chatBoardWrapper}
             sx={{
-              display: !isUpMd && !selectedUser ? "none" : "block"
+              display:
+                (!isUpMd && !selectedUser) || (showUserList && !isUpMd)
+                  ? "none"
+                  : "block"
             }}
           >
-            <Grid container>
+            <Grid container height="100%">
               <Grid item xs={12} height="100%">
                 <Board
                   userId={userId}
