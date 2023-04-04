@@ -88,70 +88,72 @@ const UserList: FC<Props> = (props) => {
   return (
     <>
       <List sx={{ width: "100%", bgcolor: "background.paper" }}>
-        {userList?.map((user) => {
-          const unreadMessages = chatList[user._id]?.filter(
-            (el) => el.unread
-          ).length;
-          return (
-            <MuiBadge
-              overlap="circular"
-              color="error"
-              badgeContent={unreadMessages}
-              sx={{
-                width: "100%",
-                "& .MuiBadge-anchorOriginTopRight": {
-                  right: "20px",
-                  top: "15px"
-                }
-              }}
-            >
-              <ListItem
-                alignItems="flex-start"
-                className={classes.taskListItem}
-                key={user._id}
-                onClick={() => {
-                  handleSelectUser(user);
-                  if (onClickUser) onClickUser();
+        {userList
+          ?.filter((el) => el.isOnline === "Y")
+          ?.map((user) => {
+            const unreadMessages = chatList[user._id]?.filter(
+              (el) => el.unread
+            ).length;
+            return (
+              <MuiBadge
+                overlap="circular"
+                color="error"
+                badgeContent={unreadMessages}
+                sx={{
+                  width: "100%",
+                  "& .MuiBadge-anchorOriginTopRight": {
+                    right: "20px",
+                    top: "15px"
+                  }
                 }}
-                selected={selectedUser?._id === user._id}
               >
-                <ListItemAvatar>
-                  <Badge
-                    color={user.isOnline === "Y" ? "success" : "error"}
-                    size="small"
-                    overlap="circular"
-                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                    variant="dot"
-                  >
-                    <Avatar
-                      alt={user.firstName.toUpperCase()}
-                      src="/static/images/avatar/1.jpg"
-                    />
-                  </Badge>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={
-                    <Typography
-                      gradient
-                      sx={{ display: "inline" }}
-                      variant="h5"
-                      className={classes.taskTitle}
+                <ListItem
+                  alignItems="flex-start"
+                  className={classes.taskListItem}
+                  key={user._id}
+                  onClick={() => {
+                    handleSelectUser(user);
+                    if (onClickUser) onClickUser();
+                  }}
+                  selected={selectedUser?._id === user._id}
+                >
+                  <ListItemAvatar>
+                    <Badge
+                      color={user.isOnline === "Y" ? "success" : "error"}
+                      size="small"
+                      overlap="circular"
+                      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                      variant="dot"
                     >
-                      {`${user.firstName} ${user.lastName}`}
-                    </Typography>
-                  }
-                  secondary={
-                    user.lastMessage && (
-                      <Typography sx={{ display: "inline" }} variant="body1">
-                        {user.lastMessage.message}
+                      <Avatar
+                        alt={user.firstName.toUpperCase()}
+                        src="/static/images/avatar/1.jpg"
+                      />
+                    </Badge>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={
+                      <Typography
+                        gradient
+                        sx={{ display: "inline" }}
+                        variant="h5"
+                        className={classes.taskTitle}
+                      >
+                        {`${user.firstName} ${user.lastName}`}
                       </Typography>
-                    )
-                  }
-                />
-              </ListItem>
-            </MuiBadge>
-          );
-        })}
+                    }
+                    secondary={
+                      user.lastMessage && (
+                        <Typography sx={{ display: "inline" }} variant="body1">
+                          {user.lastMessage.message}
+                        </Typography>
+                      )
+                    }
+                  />
+                </ListItem>
+              </MuiBadge>
+            );
+          })}
       </List>
       <audio ref={ringRef} src="/sounds/new_message.mp3" />
     </>
