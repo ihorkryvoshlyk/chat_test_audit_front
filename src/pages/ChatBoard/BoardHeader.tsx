@@ -72,7 +72,7 @@ const BoardHeader: FC<Props> = (props) => {
       <ListItem alignItems="flex-start">
         <ListItemAvatar>
           <Badge
-            color={selectedUser.isOnline === "Y" ? "success" : "error"}
+            color={selectedUser.isOnline === "Y" ? "success" : "grey"}
             size="small"
             overlap="circular"
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
@@ -132,7 +132,7 @@ const BoardHeader: FC<Props> = (props) => {
             Members
           </Typography>
           <Badge
-            color={selectedUser.isOnline === "Y" ? "success" : "error"}
+            color={selectedUser.isOnline === "Y" ? "success" : "grey"}
             size="small"
             overlap="circular"
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
@@ -145,7 +145,7 @@ const BoardHeader: FC<Props> = (props) => {
             />
           </Badge>
           <Badge
-            color={self?.isOnline === "Y" ? "success" : "error"}
+            color={self?.isOnline === "Y" ? "success" : "grey"}
             size="small"
             overlap="circular"
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}

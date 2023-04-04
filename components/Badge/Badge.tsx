@@ -6,7 +6,14 @@ import clsx from "clsx";
 
 export interface BadgeProps extends Omit<MuiBadgeProps, "color"> {
   size?: "xs" | "small" | "medium" | "large";
-  color?: "primary" | "secondary" | "success" | "error" | "warning" | "info";
+  color?:
+    | "primary"
+    | "secondary"
+    | "success"
+    | "error"
+    | "warning"
+    | "info"
+    | "grey";
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -52,6 +59,12 @@ const useStyles = makeStyles((theme: Theme) => ({
       color: theme.palette.info.main
     }
   },
+  backgroundGrey: {
+    "& > .MuiBadge-badge": {
+      backgroundColor: theme.customPalette.grey[0],
+      color: theme.palette.info.main
+    }
+  },
   small: {
     "& > .MuiBadge-badge": {
       width: "18px",
@@ -88,6 +101,7 @@ const Badge: FC<BadgeProps> = (props) => {
         [classes.backgroundError]: color === "error",
         [classes.backgroundWarning]: color === "warning",
         [classes.backgroundInfo]: color === "info",
+        [classes.backgroundGrey]: color === "grey",
         [classes.small]: size === "small",
         [classes.medium]: size === "medium",
         [classes.large]: size === "large"
