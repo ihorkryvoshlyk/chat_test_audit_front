@@ -39,7 +39,6 @@ const BoardHeader: FC<Props> = (props) => {
   const isUpSm = useMediaQuery("(min-width:768px)");
 
   const handleTypingUser = (socketResponse) => {
-    console.log(socketResponse);
     dispatch(setTypingUser(socketResponse));
   };
 

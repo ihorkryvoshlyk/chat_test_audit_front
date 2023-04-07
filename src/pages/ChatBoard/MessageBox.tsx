@@ -117,11 +117,6 @@ const MessageBox: FC<Props> = (props) => {
   useInterval(
     () => {
       if (socket && selectedUser && self) {
-        console.log({
-          from: self._id,
-          to: selectedUser._id,
-          isTyping
-        });
         socket.emit("typing-message", {
           from: self._id,
           to: selectedUser._id,
@@ -148,7 +143,7 @@ const MessageBox: FC<Props> = (props) => {
   };
 
   const handleAttachFile = () => {
-    console.log("attach");
+    // TODO: file attach
   };
   return (
     <Grid item display="flex" padding={`${isUpSmall ? "20px" : "10px 0px"}`}>
