@@ -17,7 +17,7 @@ const Authentication = () => {
   const [tabValue, setTabValue] = useState<string>("signin");
   const classes = useStyles();
 
-  const handlChangeTab = (e, value) => {
+  const handleChangeTab = (e, value) => {
     setTabValue(value);
   };
 
@@ -30,7 +30,7 @@ const Authentication = () => {
         <Grid item xs={12}>
           <Tabs
             value={tabValue}
-            onChange={handlChangeTab}
+            onChange={handleChangeTab}
             textColor="primary"
             indicatorColor="primary"
             centered
