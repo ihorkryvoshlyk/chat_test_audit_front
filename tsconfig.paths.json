@@ -2,11 +2,11 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@component/*": ["components/*"],
-      "@utils/*": ["utils/*"],
-      "@interfaces/*": ["interfaces/*"],
-      "@redux/*": ["redux/*"],
-      "@hooks/*": ["hooks/*"]
+      "@component/*": ["src/components/*"],
+      "@utils/*": ["src/utils/*"],
+      "@interfaces/*": ["src/interfaces/*"],
+      "@redux/*": ["src/redux/*"],
+      "@hooks/*": ["src/hooks/*"]
     }
   }
 }
