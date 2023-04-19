@@ -1,9 +1,9 @@
 import io from "socket.io-client";
 
 // in development mode
-// const socketUrl = "http://localhost:4000";
+const socketUrl = "http://localhost:4000";
 // in production mode
-const socketUrl = "/";
+// const socketUrl = "/";
 
 const initSocket = (userId) =>
   io(socketUrl, {

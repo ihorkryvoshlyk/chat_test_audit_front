@@ -55,9 +55,6 @@ const UserList: FC<Props> = (props) => {
   useEffect(() => {
     if (socket && userId) {
       socket.emit("chat-list", { userId });
-      socket.on("chat-list-response", (data) => {
-        dispatch(setUsers(data));
-      });
     }
   }, [socket]);
 
@@ -70,13 +67,19 @@ const UserList: FC<Props> = (props) => {
     );
   };
 
+  const receiverUserList = (socketResponse) => {
+    dispatch(setUsers(socketResponse));
+  };
+
   useEffect(() => {
     if (socket) {
       socket.on("add-message-response", receiveSocketMessages);
+      socket.on("chat-list-response", receiverUserList);
     }
     return () => {
       if (socket) {
         socket.off("add-message-response", receiveSocketMessages);
+        socket.off("chat-list-response", receiverUserList);
       }
     };
   }, [socket, selectedUser]);

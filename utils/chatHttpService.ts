@@ -42,12 +42,12 @@ const userSessionCheck = (userId) =>
   });
 
 const getMessages = (userId, toUserId) =>
-  axios.post(`/api/message/getMessages`, {
+  axios.post(`/api/message/get-messages`, {
     userId,
     toUserId
   });
 
-const getUserInfo = (userId) => axios.get(`/api/auth/user-info/${userId}`);
+const getUserInfo = (userId) => axios.get(`/api/user/user-info/${userId}`);
 
 export default {
   getUserId,

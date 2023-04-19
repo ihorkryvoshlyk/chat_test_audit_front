@@ -49,6 +49,7 @@ const chatSlice = createSlice({
             newUserList = [...state.users, ...(action.payload.chatList || [])];
           }
         } else if (action.payload.userDisconnected) {
+          console.log(action.payload);
           newUserList = state.users.map((user) => {
             if (user._id === action.payload.userid) {
               return {
@@ -84,8 +85,16 @@ const chatSlice = createSlice({
       const { from, to } = action.payload.message;
       const myId = localStorage.getItem("userid");
       if (from === myId) {
+        // const newUserList = [...state.users];
+        // const idx = newUserList.findIndex((user) => user._id === myId);
+        // const me = newUserList.find((user) => user._id === myId);
+        // if (me) {
+        //   me.lastMessage = action.payload.message;
+        //   newUserList[idx] = me;
+        // }
         return {
           ...state,
+          // users: newUserList,
           chats: {
             ...state.chats,
             [to]: [...(state.chats[to] || []), action.payload.message]
@@ -93,8 +102,16 @@ const chatSlice = createSlice({
         };
       }
       if (from === state.selectedUser?._id) {
+        // const newUserList = [...state.users];
+        // const idx = newUserList.findIndex((user) => user._id === from);
+        // const receiver = newUserList.find((user) => user._id === from);
+        // if (receiver) {
+        //   receiver.lastMessage = action.payload.message;
+        //   newUserList[idx] = receiver;
+        // }
         return {
           ...state,
+          // users: newUserList,
           chats: {
             ...state.chats,
             [from]: [...(state.chats[from] || []), action.payload.message]

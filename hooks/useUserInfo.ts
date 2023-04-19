@@ -14,7 +14,7 @@ const useUserInfo = (userId) => {
         setIsLoading(true);
         const { data: userInfo } = await chatHttpService.getUserInfo(userId);
         setIsLoading(false);
-        setUser(userInfo);
+        setUser(userInfo[0]);
       } catch (error) {
         setError(true);
         setIsLoading(false);

@@ -135,6 +135,13 @@ const MessageBox: FC<Props> = (props) => {
     if (e.keyCode === 13) {
       e.preventDefault();
       handleSendMessage();
+      if (socket && selectedUser && self) {
+        socket.emit("typing-message", {
+          from: self._id,
+          to: selectedUser._id,
+          isTyping: false
+        });
+      }
     }
   };
 
@@ -152,7 +159,9 @@ const MessageBox: FC<Props> = (props) => {
           <MessageInput
             value={message}
             onChange={(value) => {
-              setIsTyping(true);
+              if (value) {
+                setIsTyping(true);
+              }
               setMessage(value);
             }}
             onKeyDown={handleKeyDown}

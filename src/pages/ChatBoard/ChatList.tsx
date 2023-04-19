@@ -50,7 +50,7 @@ const ChatList: FC<Props> = (props) => {
 
         dispatch(
           setChats({
-            messages: response.data.messages
+            messages: response.data
           })
         );
         scrollMessageContainer();

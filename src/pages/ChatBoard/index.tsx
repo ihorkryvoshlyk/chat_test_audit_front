@@ -78,7 +78,7 @@ const ChatBoard = () => {
   }, [userId]);
 
   useBeforeunload(() => {
-    socket.emit("logout", {
+    socket?.emit("logout", {
       userId
     });
   });
