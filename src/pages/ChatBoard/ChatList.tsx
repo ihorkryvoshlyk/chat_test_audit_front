@@ -12,8 +12,10 @@ import { ChatUser } from "@interfaces/entities";
 import { getChatList, getUserList } from "@redux/chat/selectors";
 import { setChats } from "@redux/chat";
 import useGlobalSnackbar from "@hooks/useGlobalSnackbar";
-
-import chatHttpService from "@utils/chatHttpService";
+import useAxiosApi from "@hooks/useAxiosApi";
+import { message as messageApis } from "@utils/apis";
+import { GetMessageApiPayload } from "@interfaces/payloads";
+import { GetMessageApiResponse } from "@interfaces/responses";
 
 export interface Props {
   userId?: string | null;
@@ -28,6 +30,10 @@ const ChatList: FC<Props> = (props) => {
   const messageContainer = useRef<HTMLDivElement>(null);
 
   const { openSnackbar } = useGlobalSnackbar();
+  const { execute: getMessages } = useAxiosApi<
+    GetMessageApiResponse[],
+    GetMessageApiPayload
+  >(messageApis.getMessages);
 
   const scrollMessageContainer = () => {
     if (messageContainer.current) {
@@ -40,13 +46,13 @@ const ChatList: FC<Props> = (props) => {
     }
   };
 
-  const getMessages = async () => {
+  const handleGetMessages = async () => {
     try {
-      if (selectedUser) {
-        const response = await chatHttpService.getMessages(
+      if (selectedUser && userId) {
+        const response = await getMessages({
           userId,
-          selectedUser._id
-        );
+          toUserId: selectedUser._id
+        });
 
         dispatch(
           setChats({
@@ -75,7 +81,7 @@ const ChatList: FC<Props> = (props) => {
   }, [chatList]);
 
   useEffect(() => {
-    getMessages();
+    handleGetMessages();
   }, [selectedUser]);
 
   return (

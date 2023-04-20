@@ -8,8 +8,11 @@ import { AxiosError } from "axios";
 
 import Button from "@component/Button";
 import { LoginForm } from "@interfaces/form";
-import chatHttpService from "@utils/chatHttpService";
 import useGlobalSnackbar from "@hooks/useGlobalSnackbar";
+import useAxiosApi from "@hooks/useAxiosApi";
+import { auth as authApis } from "@utils/apis";
+import { SigninApiResponse } from "@interfaces/responses";
+import { SigninApiPayload } from "@interfaces/payloads";
 
 const LoginFormSchema = yup.object().shape({
   email: yup
@@ -36,10 +39,13 @@ const Signin = () => {
   const navigate = useNavigate();
   const { openSnackbar } = useGlobalSnackbar();
 
+  const { execute: signin } = useAxiosApi<SigninApiResponse, SigninApiPayload>(
+    authApis.signin
+  );
+
   const handleLogin = async (values) => {
     try {
-      const resp = await chatHttpService.login(values);
-      chatHttpService.setLS("userid", resp.data.userId);
+      await signin(values);
       navigate("/");
     } catch (error) {
       const { response } = error as AxiosError;

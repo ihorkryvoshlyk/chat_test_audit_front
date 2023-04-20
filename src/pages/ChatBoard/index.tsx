@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Socket } from "socket.io-client";
 import { useBeforeunload } from "react-beforeunload";
 
@@ -13,6 +13,8 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 
 import initSocket from "@utils/initSocket";
 import { getSelectedUser } from "@redux/chat/selectors";
+import { setSigninId } from "@redux/chat";
+import useGetSigninId from "@hooks/useGetSigninUserId";
 
 import Header from "./Header";
 import SideMenu from "./SideMenu";
@@ -57,7 +59,8 @@ const drawerWidth = 155;
 const ChatBoard = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const classes = useStyles();
-  const userId = localStorage.getItem("userid");
+  const dispatch = useDispatch();
+  const userId = useGetSigninId();
   const [socket, setSocket] = useState<Socket | undefined>(undefined);
   const [showUserList, setShowUserList] = useState<boolean>(false);
   const selectedUser = useSelector(getSelectedUser);
@@ -71,6 +74,7 @@ const ChatBoard = () => {
   useEffect(() => {
     if (userId) {
       setSocket(initSocket(userId));
+      dispatch(setSigninId(userId));
     }
     return () => {
       setSocket(undefined);

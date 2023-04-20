@@ -9,6 +9,7 @@ export type ChatState = {
     [key: string]: Chat[];
   };
   selectedUser?: ChatUser;
+  signinId?: string;
 };
 
 const initialState: ChatState = {
@@ -20,8 +21,12 @@ const chatSlice = createSlice({
   name: "chat",
   initialState,
   reducers: {
+    setSigninId: (state, action: PayloadAction<any>) => ({
+      ...state,
+      signinId: action.payload
+    }),
     setUsers(state, action: PayloadAction<any>) {
-      const userId = localStorage.getItem("userid");
+      const userId = state.signinId;
       if (!action.payload.error) {
         let newUserList: ChatUser[] = [];
         if (action.payload.singleUser && action.payload.chatList[0]) {
@@ -49,7 +54,6 @@ const chatSlice = createSlice({
             newUserList = [...state.users, ...(action.payload.chatList || [])];
           }
         } else if (action.payload.userDisconnected) {
-          console.log(action.payload);
           newUserList = state.users.map((user) => {
             if (user._id === action.payload.userid) {
               return {
@@ -83,18 +87,20 @@ const chatSlice = createSlice({
     },
     addChat(state, action: PayloadAction<any>) {
       const { from, to } = action.payload.message;
-      const myId = localStorage.getItem("userid");
+      const newUserList = state.users.map((user) => {
+        if (user._id === to || user._id === from) {
+          return {
+            ...user,
+            lastMessage: action.payload.message
+          };
+        }
+        return user;
+      });
+      const myId = state.signinId;
       if (from === myId) {
-        // const newUserList = [...state.users];
-        // const idx = newUserList.findIndex((user) => user._id === myId);
-        // const me = newUserList.find((user) => user._id === myId);
-        // if (me) {
-        //   me.lastMessage = action.payload.message;
-        //   newUserList[idx] = me;
-        // }
         return {
           ...state,
-          // users: newUserList,
+          users: newUserList,
           chats: {
             ...state.chats,
             [to]: [...(state.chats[to] || []), action.payload.message]
@@ -102,16 +108,9 @@ const chatSlice = createSlice({
         };
       }
       if (from === state.selectedUser?._id) {
-        // const newUserList = [...state.users];
-        // const idx = newUserList.findIndex((user) => user._id === from);
-        // const receiver = newUserList.find((user) => user._id === from);
-        // if (receiver) {
-        //   receiver.lastMessage = action.payload.message;
-        //   newUserList[idx] = receiver;
-        // }
         return {
           ...state,
-          // users: newUserList,
+          users: newUserList,
           chats: {
             ...state.chats,
             [from]: [...(state.chats[from] || []), action.payload.message]
@@ -121,6 +120,7 @@ const chatSlice = createSlice({
 
       return {
         ...state,
+        users: newUserList,
         chats: {
           ...state.chats,
           [from]: [
@@ -157,6 +157,12 @@ const chatSlice = createSlice({
   }
 });
 
-export const { setUsers, setChats, addChat, setTypingUser, setSelectedUser } =
-  chatSlice.actions;
+export const {
+  setSigninId,
+  setUsers,
+  setChats,
+  addChat,
+  setTypingUser,
+  setSelectedUser
+} = chatSlice.actions;
 export default chatSlice.reducer;

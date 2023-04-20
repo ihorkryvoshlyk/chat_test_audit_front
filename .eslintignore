@@ -7,5 +7,6 @@ jest.setup.js
 next.config.js
 lint-staged.config.js
 config-overrides.js
+commitlint.config.js
 package.json
 *.md

@@ -6,9 +6,12 @@ import * as yup from "yup";
 import { AxiosError } from "axios";
 
 import Button from "@component/Button";
-import chatHttpService from "@utils/chatHttpService";
 import { SignupForm } from "@interfaces/form";
 import useGlobalSnackbar from "@hooks/useGlobalSnackbar";
+import { auth as authApis } from "@utils/apis";
+import useAxiosApi from "@hooks/useAxiosApi";
+import { SignupApiPayload } from "@interfaces/payloads";
+import { SignupApiResponse } from "@interfaces/responses";
 
 const SignpuFormSchema = yup.object().shape({
   firstName: yup.string().required("This field must be required."),
@@ -37,11 +40,13 @@ const Signup = () => {
     }
   });
   const { openSnackbar } = useGlobalSnackbar();
+  const { execute: signup } = useAxiosApi<SignupApiResponse, SignupApiPayload>(
+    authApis.signup
+  );
 
   const handleSignup = async (values) => {
     try {
-      const response = await chatHttpService.register(values);
-      chatHttpService.setLS("userid", response.data.userId);
+      await signup(values);
       openSnackbar({
         color: "success",
         gradient: true,
